@@ -1,5 +1,13 @@
-# Created by https://www.toptal.com/developers/gitignore/api/macos,windows,linux,reactnative,xcode,androidstudio
-# Edit at https://www.toptal.com/developers/gitignore?templates=macos,windows,linux,reactnative,xcode,androidstudio
+# Created by https://www.toptal.com/developers/gitignore/api/macos,linux,windows,xcode,androidstudio,reactnative,cocoapods
+# Edit at https://www.toptal.com/developers/gitignore?templates=macos,linux,windows,xcode,androidstudio,reactnative,cocoapods
+
+### CocoaPods ###
+## CocoaPods GitIgnore Template
+
+# CocoaPods - Only use to conserve bandwidth / Save time on Pushing
+#           - Also handy if you have a large number of dependant pods
+#           - AS PER https://guides.cocoapods.org/using/using-cocoapods.html NEVER IGNORE THE LOCK FILE
+Pods/
 
 ### Linux ###
 *~
@@ -307,6 +315,25 @@ $RECYCLE.BIN/
 
 ### Xcode ###
 
+build/
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+xcuserdata
+*.xccheckout
+*.moved-aside
+DerivedData
+*.hmap
+*.ipa
+*.xcuserstate
+project.xcworkspace
+.xcode.env.local
+
 
 ### Xcode Patch ###
 *.xcodeproj/*
@@ -436,4 +463,8 @@ fabric.properties
 
 !/gradle/wrapper/gradle-wrapper.jar
 
-# End of https://www.toptal.com/developers/gitignore/api/macos,windows,linux,reactnative,xcode,androidstudio
+# End of https://www.toptal.com/developers/gitignore/api/macos,linux,windows,xcode,androidstudio,reactnative,cocoapods
+
+agconnect-services.json
+google-services.json
+mcs-services.json
