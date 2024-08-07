@@ -14,7 +14,7 @@
   "dependencies": {
     "react": "18.2.0",
     "react-native": "0.74.3",
-    "react-native-push-collection": "link:/Users/asterisk/tmp/2024.07.26/react-native-push-collection-0.1.0"
+    "react-native-push-collection": "link:/Users/asterisk/tmp/2024.07.26/react-native-push-collection-1.0.0-alpha.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
