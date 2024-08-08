@@ -5610,6 +5610,11 @@ react-is@^17.0.1:
   resolved "https://registry.npmjs.org/react-is/-/react-is-17.0.2.tgz#e691d4a8e9c789365655539ab372762b0efb54f0"
   integrity sha512-w2GsyukL62IJnlaff/nRegPQR94C/XXamvMWmSHRJ4y7Ts/4ocGRmTHvOs8PSE6pB3dWOrD/nueuU5sduBsQ4w==
 
+react-native-chat-sdk@^1.5.1:
+  version "1.5.1"
+  resolved "https://registry.npmjs.org/react-native-chat-sdk/-/react-native-chat-sdk-1.5.1.tgz#7b7b66c5f5beaec6d9296aa8b1bffae4c1035f1d"
+  integrity sha512-7DcsQR2Swh+v7i6b2st0cJu648pbJRNGhZsuJhCBpSIw637Ol7mHPBi3j8SiEv7+VhLYuGyb0DSUsy0xitKTww==
+
 "react-native-push-collection@link:../react-native-push-collection-1.0.0-alpha.0":
   version "0.0.0"
   uid ""

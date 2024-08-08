@@ -9,11 +9,13 @@
     "start": "react-native start",
     "startr": "react-native start --reset-cache",
     "startr8888": "react-native start --reset-cache --port 8888",
-    "test": "jest"
+    "test": "jest",
+    "gen-env": "node ./scripts/generate-env.js"
   },
   "dependencies": {
     "react": "18.2.0",
     "react-native": "0.74.3",
+    "react-native-chat-sdk": "^1.5.1",
     "react-native-push-collection": "link:/Users/asterisk/tmp/2024.07.26/react-native-push-collection-1.0.0-alpha.0"
   },
   "devDependencies": {

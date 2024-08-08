@@ -84,6 +84,7 @@ PODS:
   - hermes-engine (0.74.3):
     - hermes-engine/Pre-built (= 0.74.3)
   - hermes-engine/Pre-built (0.74.3)
+  - HyphenateChat (4.7.0)
   - nanopb (2.30910.0):
     - nanopb/decode (= 2.30910.0)
     - nanopb/encode (= 2.30910.0)
@@ -1018,9 +1019,16 @@ PODS:
   - React-Mapbuffer (0.74.3):
     - glog
     - React-debug
-  - react-native-push-collection (0.1.0):
+  - react-native-chat-sdk (1.5.1):
+    - HyphenateChat (= 4.7.0)
+    - React-Core
+  - react-native-push-collection (1.0.0-alpha.0):
     - DoubleConversion
+    - FirebaseAuth (>= 10.0.0)
+    - FirebaseCore (>= 10.0.0)
+    - FirebaseMessaging (>= 10.0.0)
     - glog
+    - GoogleUtilities
     - hermes-engine
     - RCT-Folly (= 2024.01.01.00)
     - RCTRequired
@@ -1276,9 +1284,9 @@ DEPENDENCIES:
   - boost (from `../node_modules/react-native/third-party-podspecs/boost.podspec`)
   - DoubleConversion (from `../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec`)
   - FBLazyVector (from `../node_modules/react-native/Libraries/FBLazyVector`)
-  - FirebaseAuth
-  - FirebaseCore
-  - FirebaseMessaging
+  - FirebaseAuth (>= 10.0.0)
+  - FirebaseCore (>= 10.0.0)
+  - FirebaseMessaging (>= 10.0.0)
   - fmt (from `../node_modules/react-native/third-party-podspecs/fmt.podspec`)
   - glog (from `../node_modules/react-native/third-party-podspecs/glog.podspec`)
   - GoogleUtilities
@@ -1309,6 +1317,7 @@ DEPENDENCIES:
   - React-jsitracing (from `../node_modules/react-native/ReactCommon/hermes/executor/`)
   - React-logger (from `../node_modules/react-native/ReactCommon/logger`)
   - React-Mapbuffer (from `../node_modules/react-native/ReactCommon`)
+  - react-native-chat-sdk (from `../node_modules/react-native-chat-sdk`)
   - react-native-push-collection (from `../node_modules/react-native-push-collection`)
   - React-nativeconfig (from `../node_modules/react-native/ReactCommon`)
   - React-NativeModulesApple (from `../node_modules/react-native/ReactCommon/react/nativemodule/core/platform/ios`)
@@ -1346,6 +1355,7 @@ SPEC REPOS:
     - GoogleDataTransport
     - GoogleUtilities
     - GTMSessionFetcher
+    - HyphenateChat
     - nanopb
     - PromisesObjC
     - RecaptchaInterop
@@ -1413,6 +1423,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/logger"
   React-Mapbuffer:
     :path: "../node_modules/react-native/ReactCommon"
+  react-native-chat-sdk:
+    :path: "../node_modules/react-native-chat-sdk"
   react-native-push-collection:
     :path: "../node_modules/react-native-push-collection"
   React-nativeconfig:
@@ -1480,6 +1492,7 @@ SPEC CHECKSUMS:
   GoogleUtilities: ea963c370a38a8069cc5f7ba4ca849a60b6d7d15
   GTMSessionFetcher: 8000756fc1c19d2e5697b90311f7832d2e33f6cd
   hermes-engine: 1f547997900dd0752dc0cc0ae6dd16173c49e09b
+  HyphenateChat: 0d76f40cec79d084a2c1133e43987e7379124694
   nanopb: 438bc412db1928dac798aa6fd75726007be04262
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
   RCT-Folly: 02617c592a293bd6d418e0a88ff4ee1f88329b47
@@ -1506,7 +1519,8 @@ SPEC CHECKSUMS:
   React-jsitracing: 6b3c8c98313642140530f93c46f5a6ca4530b446
   React-logger: fa92ba4d3a5d39ac450f59be2a3cec7b099f0304
   React-Mapbuffer: 9f68550e7c6839d01411ac8896aea5c868eff63a
-  react-native-push-collection: fc41ded77faf91b96762f96ccdf701ef1d493e50
+  react-native-chat-sdk: 65c3ee9d25a83ed148fe71d1874f87ba6250a38e
+  react-native-push-collection: f86a0369805c27b38cd0429c152e0f6f027d0dd7
   React-nativeconfig: fa5de9d8f4dbd5917358f8ad3ad1e08762f01dcb
   React-NativeModulesApple: 585d1b78e0597de364d259cb56007052d0bda5e5
   React-perflogger: 7bb9ba49435ff66b666e7966ee10082508a203e8
@@ -1534,6 +1548,6 @@ SPEC CHECKSUMS:
   SocketRocket: abac6f5de4d4d62d24e11868d7a2f427e0ef940d
   Yoga: 04f1db30bb810187397fa4c37dd1868a27af229c
 
-PODFILE CHECKSUM: b9751cecff7a533bdad01fcbcc77202c633ea1f7
+PODFILE CHECKSUM: 71c8145304bf1c4e79753a739f03c0dfd7e4ce9b
 
 COCOAPODS: 1.14.2

@@ -8,7 +8,7 @@ const {getDefaultConfig, mergeConfig} = require('@react-native/metro-config');
  */
 const config = {
   watchFolders: [
-    '/Users/asterisk/tmp/2024.07.26/react-native-push-collection-0.1.0',
+    '/Users/asterisk/tmp/2024.07.26/react-native-push-collection-1.0.0-alpha.0',
   ],
   resolver: {
     nodeModulesPaths: [
