@@ -20,6 +20,7 @@ import {
   Keyboard,
   KeyboardAvoidingView,
   Platform,
+  PermissionsAndroid,
 } from 'react-native';
 import {
   ChatClient,
@@ -97,7 +98,7 @@ export default function App() {
         ToastAndroid.show('push:init:success', ToastAndroid.SHORT);
         ChatPushClient.getInstance().addListener({
           onError: error => {
-            console.log('test:zuoyu:onError:', error);
+            console.warn('test:zuoyu:onError:', error);
             ToastAndroid.show(
               'onError' + JSON.stringify(error),
               ToastAndroid.SHORT,
@@ -177,8 +178,12 @@ export default function App() {
     ChatPushClient.getInstance().clearListener();
   }, []);
 
-  const onGetTokenAsync = () => {
+  const onGetTokenAsync = async () => {
     console.log('test:zuoyu:click:onGetTokenAsync');
+    const ret = await requestPermission();
+    if (ret === false) {
+      return;
+    }
     ChatPushClient.getInstance()
       .getTokenAsync()
       .then(() => {
@@ -186,12 +191,51 @@ export default function App() {
         ToastAndroid.show('chat:onGetTokenAsync:success', ToastAndroid.SHORT);
       })
       .catch(e => {
-        console.log('test:zuoyu:click:onGetTokenAsync:error:', e);
+        console.warn('test:zuoyu:click:onGetTokenAsync:error:', e);
         ToastAndroid.show(
           'chat:onGetTokenAsync:failed' + JSON.stringify(e),
           ToastAndroid.SHORT,
         );
       });
+  };
+
+  const onRegister = async () => {
+    console.log('test:zuoyu:click:onRegister');
+    const ret = await requestPermission();
+    if (ret === false) {
+      return;
+    }
+    ChatPushClient.getInstance()
+      .registerPush()
+      .then(() => {
+        console.log('test:zuoyu:click:onRegister:success');
+        ToastAndroid.show('chat:onRegister:success', ToastAndroid.SHORT);
+      })
+      .catch(e => {
+        console.warn('test:zuoyu:click:onRegister:error:', e);
+        ToastAndroid.show(
+          'chat:onRegister:failed' + JSON.stringify(e),
+          ToastAndroid.SHORT,
+        );
+      });
+  };
+
+  const requestPermission = async () => {
+    if (Platform.OS === 'android') {
+      const version = Platform.Version;
+      if (version >= 33) {
+        const status = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+        );
+        if (status === PermissionsAndroid.RESULTS.GRANTED) {
+          console.log('test:zuoyu:requestPermission:success');
+          return true;
+        } else {
+          return false;
+        }
+      }
+    }
+    return true;
   };
 
   const onLoginAction = () => {
@@ -322,6 +366,9 @@ export default function App() {
       </Pressable>
       <Pressable style={styles.button} onPress={onGetTokenAsync}>
         <Text>{'get token async'}</Text>
+      </Pressable>
+      <Pressable style={styles.button} onPress={onRegister}>
+        <Text>{'register async'}</Text>
       </Pressable>
       <Pressable style={styles.button} onPress={onLogoutAction}>
         <Text>{'logout action'}</Text>

@@ -1,4 +1,4 @@
-package com.rntestpushexample
+package com.pushcollectionexample
 
 import android.app.Application
 import com.facebook.react.PackageList

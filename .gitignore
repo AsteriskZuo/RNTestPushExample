@@ -469,5 +469,7 @@ agconnect-services.json
 google-services.json
 mcs-services.json
 GoogleService-Info.plist
+*.test.json
 
 env.ts
+output-metadata.json
