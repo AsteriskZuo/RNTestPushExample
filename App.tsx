@@ -44,7 +44,9 @@ import {
 
 const env = require('./env.ts') as {
   appKey: string;
-  deviceId: string;
+  deviceIds: {
+    [key: string]: string;
+  };
   userId: string;
   userToken: string;
   targetId: string;
@@ -69,8 +71,20 @@ const MessageItemView = React.memo((props: {item: MessageItem}) => {
 });
 
 export default function App() {
+  const getPushType = React.useCallback(() => {
+    let ret: PushType;
+    const platform = getPlatform();
+    if (platform === 'ios') {
+      ret = 'fcm';
+    } else {
+      ret = (getDeviceType() ?? 'unknown') as PushType;
+    }
+    return ret;
+  }, []);
+
+  const pushTypeRef = React.useRef<PushType>(getPushType());
   const appKeyRef = React.useRef<string>(env.appKey);
-  const deviceIdRef = React.useRef<string>(env.deviceId);
+  const deviceIdRef = React.useRef<string>(env.deviceIds[pushTypeRef.current]);
   const tokenRef = React.useRef<string>();
   const contentInputRef = React.useRef<TextInput>(null);
   const [data, setData] = React.useState<MessageItem[]>([]);
@@ -80,18 +94,11 @@ export default function App() {
   const [content, setContent] = React.useState<string>('');
 
   const init = React.useCallback(() => {
-    const platform = getPlatform();
-    let pushType: PushType;
-    if (platform === 'ios') {
-      pushType = 'fcm';
-    } else {
-      pushType = (getDeviceType() ?? 'unknown') as PushType;
-    }
-    console.log('test:zuoyu:init:', pushType);
+    console.log('test:zuoyu:init:', pushTypeRef.current, deviceIdRef.current);
     ChatPushClient.getInstance()
       .init({
         platform: getPlatform(),
-        pushType: pushType as any,
+        pushType: pushTypeRef.current as any,
       })
       .then(() => {
         console.log('test:zuoyu:init:addListener');
