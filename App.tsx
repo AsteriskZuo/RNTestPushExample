@@ -10,8 +10,7 @@ import {
   StyleSheet,
   View,
   Text,
-  Pressable,
-  ToastAndroid,
+  TouchableHighlight,
   TextInput,
   FlatList,
   ListRenderItemInfo,
@@ -51,7 +50,7 @@ const env = require('./env.ts') as {
   userToken: string;
   targetId: string;
 };
-console.log('test:zuoyu:env:', env);
+console.log('env:', env);
 
 type MessageItem = {
   id: string;
@@ -63,15 +62,13 @@ const MessageItemView = React.memo((props: {item: MessageItem}) => {
   return (
     <View style={styles.listItem}>
       <Text style={styles.id}>{item.id}</Text>
-      <Text style={styles.text} numberOfLines={1}>
-        {item.text}
-      </Text>
+      <Text style={styles.text}>{item.text}</Text>
     </View>
   );
 });
 
 export default function App() {
-  const getPushType = React.useCallback(() => {
+  const pushTypeMemo = React.useMemo(() => {
     let ret: PushType;
     const platform = getPlatform();
     if (platform === 'ios') {
@@ -82,7 +79,7 @@ export default function App() {
     return ret;
   }, []);
 
-  const pushTypeRef = React.useRef<PushType>(getPushType());
+  const pushTypeRef = React.useRef<PushType>(pushTypeMemo);
   const appKeyRef = React.useRef<string>(env.appKey);
   const deviceIdRef = React.useRef<string>(env.deviceIds[pushTypeRef.current]);
   const tokenRef = React.useRef<string>();
@@ -94,34 +91,32 @@ export default function App() {
   const [content, setContent] = React.useState<string>('');
   const [appKey, setAppKey] = React.useState<string>(appKeyRef.current);
 
+  const onLog = React.useCallback((c: string) => {
+    console.log(c);
+    const t = `log: ${c}`;
+    setData(prev => {
+      return [{id: new Date().getTime().toString(), text: t}, ...prev];
+    });
+  }, []);
+
   const init = React.useCallback(() => {
-    console.log('test:zuoyu:init:', pushTypeRef.current, deviceIdRef.current);
+    onLog(`push:init:start: ${pushTypeRef.current}, ${deviceIdRef.current}`);
     ChatPushClient.getInstance()
       .init({
         platform: getPlatform(),
         pushType: pushTypeRef.current as any,
       })
       .then(() => {
-        console.log('test:zuoyu:init:addListener');
-        ToastAndroid.show('push:init:success', ToastAndroid.SHORT);
+        onLog('push:init:success');
         ChatPushClient.getInstance().addListener({
           onError: error => {
-            console.warn('test:zuoyu:onError:', error);
-            ToastAndroid.show(
-              'onError' + JSON.stringify(error),
-              ToastAndroid.SHORT,
-            );
+            onLog('onError:' + JSON.stringify(error));
           },
           onReceivePushMessage: message => {
-            console.log('test:zuoyu:onReceivePushMessage:', message);
-            ToastAndroid.show(
-              'onReceivePushMessage' + JSON.stringify(message),
-              ToastAndroid.SHORT,
-            );
+            onLog('onReceivePushMessage:' + JSON.stringify(message));
           },
           onReceivePushToken: token => {
-            console.log('test:zuoyu:onReceivePushToken:', token);
-            ToastAndroid.show('onReceivePushToken' + token, ToastAndroid.SHORT);
+            onLog('onReceivePushToken:' + token);
             if (token) {
               tokenRef.current = token;
               ChatClient.getInstance()
@@ -132,21 +127,17 @@ export default function App() {
                   }),
                 )
                 .then(() => {
-                  console.log('test:zuoyu:updatePushConfig:success');
+                  onLog('updatePushConfig:success');
                 })
                 .catch(e => {
-                  console.warn('test:zuoyu:updatePushConfig:error:', e);
+                  onLog('updatePushConfig:error:' + JSON.stringify(e));
                 });
             }
           },
         } as ChatPushListener);
       })
       .catch(e => {
-        console.warn('test:zuoyu:init:error:', e);
-        ToastAndroid.show(
-          'push:init:failed' + JSON.stringify(e),
-          ToastAndroid.SHORT,
-        );
+        onLog('push:init:failed:' + JSON.stringify(e));
       });
 
     ChatClient.getInstance()
@@ -162,36 +153,27 @@ export default function App() {
         }),
       )
       .then(() => {
-        console.log('test:zuoyu:init:success');
-        ToastAndroid.show('chat:init:success', ToastAndroid.SHORT);
+        onLog('chat:init:success');
         ChatClient.getInstance().addConnectionListener({
           onConnected: () => {
-            console.log('test:zuoyu:onConnected');
+            onLog('onConnected');
           },
           onDisconnected: () => {
-            console.log('test:zuoyu:onDisconnected');
+            onLog('onDisconnected');
           },
         } as ChatConnectEventListener);
       })
       .catch(e => {
-        console.warn('test:zuoyu:init:error:', e);
-        ToastAndroid.show(
-          'chat:init:failed' + JSON.stringify(e),
-          ToastAndroid.SHORT,
-        );
+        onLog('chat:init:failed:' + JSON.stringify(e));
       });
-  }, [appKey]);
-
-  // const uninit = React.useCallback(() => {
-  //   ChatPushClient.getInstance().clearListener();
-  // }, []);
+  }, [appKey, onLog]);
 
   const onInit = () => {
     init();
   };
 
   const onGetTokenAsync = async () => {
-    console.log('test:zuoyu:click:onGetTokenAsync');
+    onLog('push:getTokenAsync:start');
     const ret = await requestPermission();
     if (ret === false) {
       return;
@@ -199,20 +181,15 @@ export default function App() {
     ChatPushClient.getInstance()
       .getTokenAsync()
       .then(() => {
-        console.log('test:zuoyu:click:onGetTokenAsync:success');
-        ToastAndroid.show('chat:onGetTokenAsync:success', ToastAndroid.SHORT);
+        onLog('push:getTokenAsync:success');
       })
       .catch(e => {
-        console.warn('test:zuoyu:click:onGetTokenAsync:error:', e);
-        ToastAndroid.show(
-          'chat:onGetTokenAsync:failed' + JSON.stringify(e),
-          ToastAndroid.SHORT,
-        );
+        onLog('push:getTokenAsync:failed:' + JSON.stringify(e));
       });
   };
 
   const onRegister = async () => {
-    console.log('test:zuoyu:click:onRegister');
+    onLog('push:registerPush:start');
     const ret = await requestPermission();
     if (ret === false) {
       return;
@@ -220,15 +197,10 @@ export default function App() {
     ChatPushClient.getInstance()
       .registerPush()
       .then(() => {
-        console.log('test:zuoyu:click:onRegister:success');
-        ToastAndroid.show('chat:onRegister:success', ToastAndroid.SHORT);
+        onLog('push:registerPush:success');
       })
       .catch(e => {
-        console.warn('test:zuoyu:click:onRegister:error:', e);
-        ToastAndroid.show(
-          'chat:onRegister:failed' + JSON.stringify(e),
-          ToastAndroid.SHORT,
-        );
+        onLog('push:registerPush:failed:' + JSON.stringify(e));
       });
   };
 
@@ -240,7 +212,7 @@ export default function App() {
           PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
         );
         if (status === PermissionsAndroid.RESULTS.GRANTED) {
-          console.log('test:zuoyu:requestPermission:success');
+          onLog('push:requestPermission:success');
           return true;
         } else {
           return false;
@@ -251,17 +223,13 @@ export default function App() {
   };
 
   const onLoginAction = () => {
+    onLog('chat:login:start');
     ChatClient.getInstance()
       .login(userId, userToken, true)
       .then(() => {
-        console.log('test:zuoyu:login:success');
-        ToastAndroid.show('chat:login:success', ToastAndroid.SHORT);
+        onLog('chat:login:success');
         ChatClient.getInstance().chatManager.addMessageListener({
           onMessagesReceived: (messages: Array<ChatMessage>) => {
-            console.log(
-              'test:zuoyu:onMessagesReceived:',
-              JSON.stringify(messages),
-            );
             for (const msg of messages) {
               if (msg.body.type === ChatMessageType.TXT) {
                 const body = msg.body as ChatTextMessageBody;
@@ -274,31 +242,24 @@ export default function App() {
         } as ChatMessageEventListener);
       })
       .catch(e => {
-        console.warn('test:zuoyu:login:error:', e);
-        ToastAndroid.show(
-          'chat:login:failed' + JSON.stringify(e),
-          ToastAndroid.SHORT,
-        );
+        onLog('chat:login:failed:' + JSON.stringify(e));
       });
   };
 
   const onLogoutAction = () => {
+    onLog('chat:logout:start');
     ChatClient.getInstance()
       .logout(true)
       .then(() => {
-        console.log('test:zuoyu:logout:success');
-        ToastAndroid.show('chat:logout:success', ToastAndroid.SHORT);
+        onLog('chat:logout:success');
       })
       .catch(e => {
-        console.warn('test:zuoyu:logout:error:', e);
-        ToastAndroid.show(
-          'chat:logout:failed.' + JSON.stringify(e),
-          ToastAndroid.SHORT,
-        );
+        onLog('chat:logout:failed:' + JSON.stringify(e));
       });
   };
 
   const onSendMessage = () => {
+    onLog('chat:sendMessage:start');
     const msg = ChatMessage.createTextMessage(
       targetId,
       content,
@@ -306,13 +267,9 @@ export default function App() {
     );
     ChatClient.getInstance().chatManager.sendMessage(msg, {
       onError: e => {
-        console.warn('test:zuoyu:onSendMessage:error:', e);
+        onLog('chat:sendMessage:failed:' + JSON.stringify(e));
       },
       onSuccess: (newMsg: ChatMessage) => {
-        console.log(
-          'test:zuoyu:onSendMessage:success:',
-          JSON.stringify(newMsg),
-        );
         const body = newMsg.body as ChatTextMessageBody;
         setData(prev => {
           return [{id: newMsg.msgId, text: body.content}, ...prev];
@@ -347,13 +304,6 @@ export default function App() {
     return <MessageItemView item={item} />;
   };
 
-  // React.useEffect(() => {
-  //   init();
-  //   return () => {
-  //     uninit();
-  //   };
-  // }, [init, uninit]);
-
   return (
     <SafeAreaView style={styles.container}>
       <TouchableNativeFeedback onPress={() => Keyboard.dismiss()}>
@@ -369,9 +319,12 @@ export default function App() {
         </View>
       </TouchableNativeFeedback>
 
-      <Pressable style={styles.button} onPress={onInit}>
+      <TouchableHighlight
+        underlayColor={'#fffaf0'}
+        style={styles.button}
+        onPress={onInit}>
         <Text>{'init action'}</Text>
-      </Pressable>
+      </TouchableHighlight>
 
       <TouchableNativeFeedback onPress={() => Keyboard.dismiss()}>
         <View style={styles.target}>
@@ -394,18 +347,30 @@ export default function App() {
         </View>
       </TouchableNativeFeedback>
 
-      <Pressable style={styles.button} onPress={onLoginAction}>
+      <TouchableHighlight
+        underlayColor={'#fffaf0'}
+        style={styles.button}
+        onPress={onLoginAction}>
         <Text>{'login action'}</Text>
-      </Pressable>
-      <Pressable style={styles.button} onPress={onGetTokenAsync}>
+      </TouchableHighlight>
+      <TouchableHighlight
+        underlayColor={'#fffaf0'}
+        style={styles.button}
+        onPress={onGetTokenAsync}>
         <Text>{'get token async'}</Text>
-      </Pressable>
-      <Pressable style={styles.button} onPress={onRegister}>
+      </TouchableHighlight>
+      <TouchableHighlight
+        underlayColor={'#fffaf0'}
+        style={styles.button}
+        onPress={onRegister}>
         <Text>{'register async'}</Text>
-      </Pressable>
-      <Pressable style={styles.button} onPress={onLogoutAction}>
+      </TouchableHighlight>
+      <TouchableHighlight
+        underlayColor={'#fffaf0'}
+        style={styles.button}
+        onPress={onLogoutAction}>
         <Text>{'logout action'}</Text>
-      </Pressable>
+      </TouchableHighlight>
 
       <TouchableNativeFeedback onPress={() => Keyboard.dismiss()}>
         <View style={styles.target}>
@@ -435,9 +400,12 @@ export default function App() {
         </View>
       </TouchableNativeFeedback>
 
-      <Pressable style={styles.button} onPress={onSendMessage}>
+      <TouchableHighlight
+        underlayColor={'#fffaf0'}
+        style={styles.button}
+        onPress={onSendMessage}>
         <Text>{'send text message'}</Text>
-      </Pressable>
+      </TouchableHighlight>
 
       <View style={styles.list}>
         <FlatList
@@ -459,7 +427,7 @@ const styles = StyleSheet.create({
   },
   button: {
     height: 40,
-    marginVertical: 10,
+    marginVertical: 4,
     backgroundColor: 'lightblue',
     justifyContent: 'center',
     alignItems: 'center',
@@ -488,7 +456,7 @@ const styles = StyleSheet.create({
     margin: 2,
     flexDirection: 'row',
     backgroundColor: 'lightyellow',
-    height: 20,
+    // height: 20,
   },
   id: {
     color: 'black',
