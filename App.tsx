@@ -92,6 +92,7 @@ export default function App() {
   const [userToken, setUserToken] = React.useState<string>(env.userToken);
   const [targetId, setTargetId] = React.useState<string>(env.targetId);
   const [content, setContent] = React.useState<string>('');
+  const [appKey, setAppKey] = React.useState<string>(appKeyRef.current);
 
   const init = React.useCallback(() => {
     console.log('test:zuoyu:init:', pushTypeRef.current, deviceIdRef.current);
@@ -153,7 +154,7 @@ export default function App() {
         new ChatOptions({
           autoLogin: false,
           debugModel: true,
-          appKey: appKeyRef.current,
+          appKey: appKey,
           pushConfig: new ChatPushConfig({
             deviceId: deviceIdRef.current,
             deviceToken: tokenRef.current,
@@ -179,11 +180,15 @@ export default function App() {
           ToastAndroid.SHORT,
         );
       });
-  }, []);
+  }, [appKey]);
 
-  const uninit = React.useCallback(() => {
-    ChatPushClient.getInstance().clearListener();
-  }, []);
+  // const uninit = React.useCallback(() => {
+  //   ChatPushClient.getInstance().clearListener();
+  // }, []);
+
+  const onInit = () => {
+    init();
+  };
 
   const onGetTokenAsync = async () => {
     console.log('test:zuoyu:click:onGetTokenAsync');
@@ -317,6 +322,10 @@ export default function App() {
     } as ChatMessageStatusCallback);
   };
 
+  const onChangeAppKey = (key: string) => {
+    setAppKey(key);
+  };
+
   const onChangeUserId = (u: string) => {
     setUserId(u);
   };
@@ -338,15 +347,32 @@ export default function App() {
     return <MessageItemView item={item} />;
   };
 
-  React.useEffect(() => {
-    init();
-    return () => {
-      uninit();
-    };
-  }, [init, uninit]);
+  // React.useEffect(() => {
+  //   init();
+  //   return () => {
+  //     uninit();
+  //   };
+  // }, [init, uninit]);
 
   return (
     <SafeAreaView style={styles.container}>
+      <TouchableNativeFeedback onPress={() => Keyboard.dismiss()}>
+        <View style={styles.target}>
+          <KeyboardAvoidingView style={styles.input}>
+            <TextInput
+              onChangeText={onChangeAppKey}
+              placeholder="appkey:"
+              autoCapitalize="none"
+              value={appKey}
+            />
+          </KeyboardAvoidingView>
+        </View>
+      </TouchableNativeFeedback>
+
+      <Pressable style={styles.button} onPress={onInit}>
+        <Text>{'init action'}</Text>
+      </Pressable>
+
       <TouchableNativeFeedback onPress={() => Keyboard.dismiss()}>
         <View style={styles.target}>
           <KeyboardAvoidingView style={styles.input}>

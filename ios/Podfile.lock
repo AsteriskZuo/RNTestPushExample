@@ -1022,7 +1022,7 @@ PODS:
   - react-native-chat-sdk (1.5.1):
     - HyphenateChat (= 4.7.0)
     - React-Core
-  - react-native-push-collection (1.0.0-alpha.0):
+  - react-native-push-collection (1.0.0-alpha.1):
     - DoubleConversion
     - FirebaseAuth (>= 10.0.0)
     - FirebaseCore (>= 10.0.0)
@@ -1520,7 +1520,7 @@ SPEC CHECKSUMS:
   React-logger: fa92ba4d3a5d39ac450f59be2a3cec7b099f0304
   React-Mapbuffer: 9f68550e7c6839d01411ac8896aea5c868eff63a
   react-native-chat-sdk: 65c3ee9d25a83ed148fe71d1874f87ba6250a38e
-  react-native-push-collection: f86a0369805c27b38cd0429c152e0f6f027d0dd7
+  react-native-push-collection: 772d1a2b11d0de38d8671dbcf810424a1f15cb4f
   React-nativeconfig: fa5de9d8f4dbd5917358f8ad3ad1e08762f01dcb
   React-NativeModulesApple: 585d1b78e0597de364d259cb56007052d0bda5e5
   React-perflogger: 7bb9ba49435ff66b666e7966ee10082508a203e8
