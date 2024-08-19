@@ -20,6 +20,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   PermissionsAndroid,
+  Pressable,
 } from 'react-native';
 import {
   ChatClient,
@@ -40,6 +41,8 @@ import {
   type PushType,
   type ChatPushListener,
 } from 'react-native-push-collection';
+import Clipboard from '@react-native-clipboard/clipboard';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const env = require('./env.ts') as {
   appKey: string;
@@ -57,29 +60,35 @@ type MessageItem = {
   text: string;
 };
 
-const MessageItemView = React.memo((props: {item: MessageItem}) => {
-  const {item} = props;
-  return (
-    <View style={styles.listItem}>
-      <Text style={styles.id}>{item.id}</Text>
-      <Text style={styles.text}>{item.text}</Text>
-    </View>
-  );
-});
+const MessageItemView = React.memo(
+  (props: {item: MessageItem; onLongPress?: (props: MessageItem) => void}) => {
+    const {item, onLongPress} = props;
+    const onPress = React.useCallback(() => {
+      onLongPress?.(item);
+    }, [item, onLongPress]);
+    return (
+      <Pressable style={styles.listItem} onPress={onPress}>
+        <Text style={styles.id}>{item.id}</Text>
+        <Text style={styles.text}>{item.text}</Text>
+      </Pressable>
+    );
+  },
+);
 
 export default function App() {
   const pushTypeMemo = React.useMemo(() => {
     let ret: PushType;
     const platform = getPlatform();
     if (platform === 'ios') {
-      ret = 'fcm';
+      ret = 'apns';
     } else {
       ret = (getDeviceType() ?? 'unknown') as PushType;
     }
     return ret;
   }, []);
 
-  const pushTypeRef = React.useRef<PushType>(pushTypeMemo);
+  const [pushType, setPushType] = React.useState<PushType>(pushTypeMemo);
+  const pushTypeRef = React.useRef<PushType>(pushType);
   const appKeyRef = React.useRef<string>(env.appKey);
   const deviceIdRef = React.useRef<string>(env.deviceIds[pushTypeRef.current]);
   const tokenRef = React.useRef<string>();
@@ -99,6 +108,37 @@ export default function App() {
     });
   }, []);
 
+  const setValueToLocal = React.useCallback(
+    async (key: string, value: string) => {
+      try {
+        await AsyncStorage.setItem(key, value);
+      } catch (error) {
+        onLog('setValueToLocal:error:' + JSON.stringify(error));
+      }
+    },
+    [onLog],
+  );
+
+  const getValueFromLocal = React.useCallback(
+    async (key: string) => {
+      try {
+        return await AsyncStorage.getItem(key);
+      } catch (error) {
+        onLog('getValueFromLocal:error:' + JSON.stringify(error));
+      }
+    },
+    [onLog],
+  );
+
+  const onChangePushType = (t: string) => {
+    setPushType(t as PushType);
+    if (t === 'fcm') {
+      setValueToLocal('pushType', 'fcm');
+    } else {
+      setValueToLocal('pushType', pushTypeMemo);
+    }
+  };
+
   const init = React.useCallback(() => {
     onLog(`push:init:start: ${pushTypeRef.current}, ${deviceIdRef.current}`);
     ChatPushClient.getInstance()
@@ -112,13 +152,14 @@ export default function App() {
           onError: error => {
             onLog('onError:' + JSON.stringify(error));
           },
-          onReceivePushMessage: message => {
+          onReceivePushMessage: (message: any) => {
             onLog('onReceivePushMessage:' + JSON.stringify(message));
           },
           onReceivePushToken: token => {
             onLog('onReceivePushToken:' + token);
             if (token) {
               tokenRef.current = token;
+              Clipboard.setString(token);
               ChatClient.getInstance()
                 .updatePushConfig(
                   new ChatPushConfig({
@@ -299,13 +340,47 @@ export default function App() {
     setContent(c);
   };
 
+  const onLongPress = React.useCallback(
+    (props: MessageItem) => {
+      Clipboard.setString(props.text);
+      onLog('copy to clipboard:' + props.text);
+    },
+    [onLog],
+  );
+
   const renderItem = (info: ListRenderItemInfo<MessageItem>) => {
     const {item} = info;
-    return <MessageItemView item={item} />;
+    return <MessageItemView item={item} onLongPress={onLongPress} />;
   };
+
+  React.useEffect(() => {
+    getValueFromLocal('pushType').then(v => {
+      const p = (v as PushType) ?? pushTypeMemo;
+      setPushType(p);
+      pushTypeRef.current = p;
+      deviceIdRef.current = env.deviceIds[p];
+      onLog(`useEffect:pushType:${v},${p},${deviceIdRef.current}`);
+    });
+  }, [getValueFromLocal, onLog, pushTypeMemo]);
 
   return (
     <SafeAreaView style={styles.container}>
+      <TouchableNativeFeedback onPress={() => Keyboard.dismiss()}>
+        <View style={styles.target}>
+          <KeyboardAvoidingView style={styles.input}>
+            <TextInput
+              onChangeText={onChangePushType}
+              placeholder="pushtype: fcm, apns, ..."
+              autoCapitalize="none"
+              value={pushType}
+            />
+            <Text style={styles.warn}>
+              {'!!!Restart the app to take effect.'}
+            </Text>
+          </KeyboardAvoidingView>
+        </View>
+      </TouchableNativeFeedback>
+
       <TouchableNativeFeedback onPress={() => Keyboard.dismiss()}>
         <View style={styles.target}>
           <KeyboardAvoidingView style={styles.input}>
@@ -347,30 +422,32 @@ export default function App() {
         </View>
       </TouchableNativeFeedback>
 
-      <TouchableHighlight
-        underlayColor={'#fffaf0'}
-        style={styles.button}
-        onPress={onLoginAction}>
-        <Text>{'login action'}</Text>
-      </TouchableHighlight>
-      <TouchableHighlight
-        underlayColor={'#fffaf0'}
-        style={styles.button}
-        onPress={onGetTokenAsync}>
-        <Text>{'get token async'}</Text>
-      </TouchableHighlight>
-      <TouchableHighlight
-        underlayColor={'#fffaf0'}
-        style={styles.button}
-        onPress={onRegister}>
-        <Text>{'register async'}</Text>
-      </TouchableHighlight>
-      <TouchableHighlight
-        underlayColor={'#fffaf0'}
-        style={styles.button}
-        onPress={onLogoutAction}>
-        <Text>{'logout action'}</Text>
-      </TouchableHighlight>
+      <View style={styles.buttonList}>
+        <TouchableHighlight
+          underlayColor={'#fffaf0'}
+          style={styles.button}
+          onPress={onLoginAction}>
+          <Text>{'login action'}</Text>
+        </TouchableHighlight>
+        <TouchableHighlight
+          underlayColor={'#fffaf0'}
+          style={styles.button}
+          onPress={onGetTokenAsync}>
+          <Text>{'get token async'}</Text>
+        </TouchableHighlight>
+        <TouchableHighlight
+          underlayColor={'#fffaf0'}
+          style={styles.button}
+          onPress={onRegister}>
+          <Text>{'register async'}</Text>
+        </TouchableHighlight>
+        <TouchableHighlight
+          underlayColor={'#fffaf0'}
+          style={styles.button}
+          onPress={onLogoutAction}>
+          <Text>{'logout action'}</Text>
+        </TouchableHighlight>
+      </View>
 
       <TouchableNativeFeedback onPress={() => Keyboard.dismiss()}>
         <View style={styles.target}>
@@ -423,11 +500,12 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    margin: 10,
+    margin: 4,
   },
   button: {
     height: 40,
-    marginVertical: 4,
+    minWidth: 50,
+    margin: 4,
     backgroundColor: 'lightblue',
     justifyContent: 'center',
     alignItems: 'center',
@@ -464,5 +542,12 @@ const styles = StyleSheet.create({
   text: {
     color: 'red',
     flex: 1,
+  },
+  warn: {
+    color: 'red',
+  },
+  buttonList: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
   },
 });
