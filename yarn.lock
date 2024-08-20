@@ -5639,7 +5639,7 @@ react-native-chat-sdk@^1.5.1:
   resolved "https://registry.npmjs.org/react-native-chat-sdk/-/react-native-chat-sdk-1.5.1.tgz#7b7b66c5f5beaec6d9296aa8b1bffae4c1035f1d"
   integrity sha512-7DcsQR2Swh+v7i6b2st0cJu648pbJRNGhZsuJhCBpSIw637Ol7mHPBi3j8SiEv7+VhLYuGyb0DSUsy0xitKTww==
 
-"react-native-push-collection@link:../../../tmp/2024.08.08/react-native-push-collection-1.0.0-alpha.1":
+"react-native-push-collection@link:../../../tmp/2024.08.08/react-native-push-collection-1.0.0-alpha.2":
   version "0.0.0"
   uid ""
 

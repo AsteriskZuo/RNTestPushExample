@@ -245,6 +245,39 @@ export default function App() {
       });
   };
 
+  const onGetToken = async () => {
+    onLog('push:getToken:start');
+    const ret = await requestPermission();
+    if (ret === false) {
+      return;
+    }
+    ChatPushClient.getInstance()
+      .getToken()
+      .then(token => {
+        onLog('push:getToken:success:' + token);
+        tokenRef.current = token;
+        if (token) {
+          Clipboard.setString(token);
+        }
+        ChatClient.getInstance()
+          .updatePushConfig(
+            new ChatPushConfig({
+              deviceId: deviceIdRef.current,
+              deviceToken: token,
+            }),
+          )
+          .then(() => {
+            onLog('updatePushConfig:success');
+          })
+          .catch(e => {
+            onLog('updatePushConfig:error:' + JSON.stringify(e));
+          });
+      })
+      .catch(e => {
+        onLog('push:getToken:failed:' + JSON.stringify(e));
+      });
+  };
+
   const requestPermission = async () => {
     if (Platform.OS === 'android') {
       const version = Platform.Version;
@@ -440,6 +473,12 @@ export default function App() {
           style={styles.button}
           onPress={onRegister}>
           <Text>{'register async'}</Text>
+        </TouchableHighlight>
+        <TouchableHighlight
+          underlayColor={'#fffaf0'}
+          style={styles.button}
+          onPress={onGetToken}>
+          <Text>{'get token'}</Text>
         </TouchableHighlight>
         <TouchableHighlight
           underlayColor={'#fffaf0'}
