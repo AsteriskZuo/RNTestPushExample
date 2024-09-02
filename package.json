@@ -18,7 +18,7 @@
     "react": "18.2.0",
     "react-native": "0.74.3",
     "react-native-chat-sdk": "^1.5.1",
-    "react-native-push-collection": "link:/Users/asterisk/tmp/2024.08.08/react-native-push-collection-1.0.0-alpha.2"
+    "react-native-push-collection": "1.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
